@@ -889,6 +889,151 @@ body {
   color: var(--text2);
 }
 
+/* ─── Send Email Bar ─────────────────────────────────── */
+.send-email-bar {
+  background: #ffffff;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.4s ease 0.1s both;
+}
+
+.send-email-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.send-email-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(37,99,235,0.15);
+  border-radius: 7px;
+  color: var(--accent2);
+  flex-shrink: 0;
+}
+
+.send-email-label {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+.send-email-controls {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-width: 240px;
+}
+
+.send-email-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 9px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.send-email-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  background: #ffffff;
+}
+
+.send-email-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.send-email-input.input-error { border-color: var(--red); }
+
+.send-email-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  box-shadow: 0 2px 10px rgba(37,99,235,0.25);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s, opacity 0.2s;
+}
+
+.send-email-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+}
+
+.send-email-btn:active:not(:disabled) { transform: translateY(0); }
+
+.send-email-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.send-email-btn.sent {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 2px 10px rgba(22,163,74,0.25);
+}
+
+.send-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.send-email-feedback {
+  width: 100%;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.send-email-error {
+  color: var(--red);
+  background: var(--red-bg);
+  border: 1px solid var(--red-bdr);
+}
+
+.send-email-success {
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-bdr);
+}
+
 /* ─── Print Styles ───────────────────────────────────── */
 @media print {
   body {

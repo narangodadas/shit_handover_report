@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import StatusBadge from "../components/StatusBadge";
+import SendReportEmail from "../components/SendReportEmail";
 
 export default function ReportPreview() {
   const { state } = useLocation();
@@ -77,6 +78,8 @@ export default function ReportPreview() {
             </button>
           </div>
         </div>
+
+        <SendReportEmail report={report} />
 
         <div className="report-document" id="report">
           {/* Report Header */}
