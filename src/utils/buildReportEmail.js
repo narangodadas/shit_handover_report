@@ -165,35 +165,6 @@ function checklistSection(checklist) {
   </tr>`;
 }
 
-export function buildImageEmailHtml(base64Image, report) {
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#eef2f7;font-family:'Segoe UI',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:28px 16px;">
-<tr><td align="center">
-  <table width="700" cellpadding="0" cellspacing="0" style="max-width:700px;">
-    <tr>
-      <td style="padding-bottom:14px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#64748b;">NOC Shift Handover &middot; ${esc(report.date)} &middot; ${esc(report.timing)}</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.12);">
-        <img src="${base64Image}" width="700" style="display:block;width:100%;max-width:700px;" alt="NOC Shift Handover Report">
-      </td>
-    </tr>
-    <tr>
-      <td style="padding-top:14px;text-align:center;">
-        <p style="margin:0;font-size:11px;color:#94a3b8;">FIT Network Operations Center &mdash; Automated Shift Handover Report</p>
-      </td>
-    </tr>
-  </table>
-</td></tr>
-</table>
-</body>
-</html>`;
-}
 
 export function buildReportEmailHtml(report) {
   const displayTasks  = report.tasks.filter(t => t.name && t.name !== 'None');

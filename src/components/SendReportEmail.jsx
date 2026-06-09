@@ -1,58 +1,7 @@
 import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
-import {
-  EMAILJS_SERVICE_ID,
-  EMAILJS_TEMPLATE_ID,
-  EMAILJS_PUBLIC_KEY,
-  IMGBB_API_KEY,
-} from '../config/emailjs';
-import { buildImageEmailHtml } from '../utils/buildReportEmail';
-
-const ANIMATION_KILL = '*, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; }';
-
-async function captureReportCanvas(reportEl) {
-  const { default: html2canvas } = await import('html2canvas');
-  if (document.fonts?.ready) await document.fonts.ready;
-
-  const full = await html2canvas(reportEl, {
-    scale: 1.0,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
-    backgroundColor: '#ffffff',
-    imageTimeout: 0,
-    scrollX: 0,
-    scrollY: -window.scrollY,
-    windowWidth: reportEl.scrollWidth,
-    onclone: (doc) => {
-      const s = doc.createElement('style');
-      s.textContent = ANIMATION_KILL;
-      doc.head.appendChild(s);
-    },
-  });
-
-  // Downscale to max 720 px wide so the base64 stays small for ImgBB upload
-  const MAX_W = 720;
-  if (full.width <= MAX_W) return full;
-  const ratio   = MAX_W / full.width;
-  const small   = document.createElement('canvas');
-  small.width   = MAX_W;
-  small.height  = Math.round(full.height * ratio);
-  small.getContext('2d').drawImage(full, 0, 0, small.width, small.height);
-  return small;
-}
-
-async function uploadToImgBB(base64Data) {
-  const fd = new FormData();
-  fd.append('key', IMGBB_API_KEY);
-  fd.append('image', base64Data.replace(/^data:image\/\w+;base64,/, ''));
-
-  const res  = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
-  if (!res.ok) throw new Error(`Image upload failed (HTTP ${res.status}).`);
-  const json = await res.json();
-  if (!json.success) throw new Error('ImgBB upload failed: ' + (json.error?.message ?? 'unknown'));
-  return json.data.url;          // real HTTPS URL, works in all email clients
-}
+import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY } from '../config/emailjs';
+import { buildReportEmailHtml } from '../utils/buildReportEmail';
 
 export default function SendReportEmail({ report }) {
   const [email, setEmail]   = useState('');
@@ -60,9 +9,8 @@ export default function SendReportEmail({ report }) {
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [errMsg, setErrMsg] = useState('');
 
-  const emailjsReady  = EMAILJS_SERVICE_ID  !== 'YOUR_SERVICE_ID';
-  const imgbbReady    = IMGBB_API_KEY       !== 'YOUR_IMGBB_API_KEY';
-  const isValidEmail  = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  const isConfigured = EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID';
+  const isValidEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
   const handleSend = async () => {
     if (!isValidEmail(email)) {
@@ -70,13 +18,8 @@ export default function SendReportEmail({ report }) {
       setStatus('error');
       return;
     }
-    if (!emailjsReady) {
+    if (!isConfigured) {
       setErrMsg('EmailJS not configured — open src/config/emailjs.js and add your credentials.');
-      setStatus('error');
-      return;
-    }
-    if (!imgbbReady) {
-      setErrMsg('Image hosting not configured — add your free ImgBB API key to src/config/emailjs.js (see instructions in that file).');
       setStatus('error');
       return;
     }
@@ -86,13 +29,7 @@ export default function SendReportEmail({ report }) {
     setErrMsg('');
 
     try {
-      const reportEl = document.getElementById('report');
-      if (!reportEl) throw new Error('Report not visible — scroll down to the report first.');
-
-      const emailCanvas  = await captureReportCanvas(reportEl);
-      const base64Image  = emailCanvas.toDataURL('image/jpeg', 0.82);
-      const hostedUrl    = await uploadToImgBB(base64Image);
-      const reportHtml   = buildImageEmailHtml(hostedUrl, report);
+      const reportHtml = buildReportEmailHtml(report);
 
       await emailjs.send(
         EMAILJS_SERVICE_ID,
@@ -106,8 +43,8 @@ export default function SendReportEmail({ report }) {
       setEmail('');
       setTimeout(() => setStatus('idle'), 6000);
     } catch (err) {
-      console.error('Send error:', err);
-      let msg = 'Send failed. Check your configuration and try again.';
+      console.error('EmailJS send error:', err);
+      let msg = 'Send failed. Check your EmailJS configuration and try again.';
       try {
         if (err?.text) msg = String(err.text);
         else if (err?.message) msg = String(err.message);
