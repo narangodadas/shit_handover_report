@@ -5,6 +5,13 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+function formatDescription(d) {
+  return String(d ?? '')
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .join(' • ');
+}
 
 const STATUS = {
   Complete: {
@@ -131,6 +138,7 @@ export function buildReportEmailHtml(report) {
       <p style="margin:0;font-size:17px;font-weight:700;color:#ffffff;letter-spacing:0.12em;text-transform:uppercase;line-height:1;">
         <span style="color:rgba(255,255,255,0.4);font-size:10px;margin-right:16px;">&#9679;</span>FIT NETWORK OPERATIONS CENTER<span style="color:rgba(255,255,255,0.4);font-size:10px;margin-left:16px;">&#9679;</span>
       </p>
+        <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${esc(formatDescription(task.description))}</p>
     </td>
   </tr>
 

@@ -8,6 +8,15 @@ export default function ReportPreview() {
   const navigate = useNavigate();
   const report = state?.reportData;
 
+  const formatDescription = (d) => {
+    if (!d) return '';
+    return String(d)
+      .split(/\r?\n/)
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join(' • ');
+  };
+
   if (!report) {
     return (
       <div className="page">
@@ -142,7 +151,7 @@ export default function ReportPreview() {
                       <span className="task-row-name">{task.name}</span>
                       <StatusBadge status={task.status} />
                     </div>
-                    <div className="task-row-desc">{task.description}</div>
+                    <div className="task-row-desc">{formatDescription(task.description)}</div>
                   </div>
                 </div>
               ))}
