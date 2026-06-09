@@ -23,3 +23,10 @@ export const TASK_OPTIONS = [
 ];
 
 export const TASK_STATUS_OPTIONS = ["Complete", "Pending", "Critical"];
+
+export const DAILY_CHECKLIST = [
+  { id: "fortiAnalyser", label: "Forti Analyser Report" },
+  { id: "dailyReport",   label: "Daily Report" },
+  { id: "nocFirewall",   label: "NOC Firewall Report" },
+  { id: "problemLibrary", label: "Problem Library Ongoing Problem" },
+];

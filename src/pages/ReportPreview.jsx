@@ -136,6 +136,47 @@ export default function ReportPreview() {
 
           <div className="report-divider" />
 
+          {/* Daily Checklist */}
+          {report.checklist && (
+            <section className="report-section">
+              <div className="report-section-header">
+                <div className="section-label-bar" />
+                <h2 className="report-section-title">Daily Checklist</h2>
+                <div className="checklist-summary-pill">
+                  <span className="checklist-done-count">
+                    {report.checklist.filter(i => i.done).length}
+                  </span>
+                  <span className="checklist-total-count">/ {report.checklist.length} Completed</span>
+                </div>
+              </div>
+              <div className="report-checklist-grid">
+                {report.checklist.map((item, i) => (
+                  <div key={i} className={`report-checklist-item${item.done ? " done" : " not-done"}`}>
+                    <div className={`report-checklist-icon${item.done ? " done-icon" : " not-done-icon"}`}>
+                      {item.done ? (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ) : (
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 2l6 6M8 2L2 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div className="report-checklist-text">
+                      <div className="report-checklist-label">{item.label}</div>
+                      <div className={`report-checklist-status-text${item.done ? " done-text" : " not-done-text"}`}>
+                        {item.done ? "Completed" : "Not completed"}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <div className="report-divider" />
+
           {/* Task Status & Updates */}
           <section className="report-section">
             <div className="report-section-header">

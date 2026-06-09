@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from "../components/Header";
 import TaskCard from "../components/TaskCard";
-import { TEAM_MEMBERS, SHIFT_OPTIONS } from "../data/constants";
+import { TEAM_MEMBERS, SHIFT_OPTIONS, DAILY_CHECKLIST } from "../data/constants";
 
 const defaultTask = () => ({ name: "", status: "Complete", description: "" });
 
@@ -15,6 +15,10 @@ export default function HandoverForm() {
   const [handoverFrom, setHandoverFrom] = useState("");
   const [handoverTo, setHandoverTo] = useState("");
   const [tasks, setTasks] = useState([defaultTask()]);
+  const [checklist, setChecklist] = useState(
+    DAILY_CHECKLIST.reduce((acc, item) => ({ ...acc, [item.id]: false }), {})
+  );
+  const toggleChecklist = (id) => setChecklist(prev => ({ ...prev, [id]: !prev[id] }));
   const [members, setMembers] = useState(TEAM_MEMBERS);
   const [errors, setErrors] = useState({});
   const [addingMember, setAddingMember] = useState({ from: false, to: false });
@@ -71,7 +75,8 @@ export default function HandoverForm() {
       timing,
       handoverFrom,
       handoverTo,
-      tasks: resolvedTasks
+      tasks: resolvedTasks,
+      checklist: DAILY_CHECKLIST.map(item => ({ label: item.label, done: checklist[item.id] }))
     };
     navigate("/report", { state: { reportData } });
   };
@@ -167,6 +172,44 @@ export default function HandoverForm() {
 
             <MemberField field="from" label="Shift Handover From" value={handoverFrom} />
             <MemberField field="to" label="Shift Handover To" value={handoverTo} />
+          </div>
+        </div>
+
+        <div className="form-card">
+          <div className="form-card-header">
+            <div className="form-card-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="4" y="2" width="12" height="16" rx="2" stroke="#2563eb" strokeWidth="1.5"/>
+                <path d="M7 7h6M7 10h6M7 13h3" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M7 6.5l1 1 2-2" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div className="form-card-title">Daily Checklist</div>
+              <div className="form-card-desc">Mark all routine checks completed before handover</div>
+            </div>
+          </div>
+          <div className="checklist-grid">
+            {DAILY_CHECKLIST.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                className={`checklist-item${checklist[item.id] ? " checked" : ""}`}
+                onClick={() => toggleChecklist(item.id)}
+              >
+                <div className="checklist-box">
+                  {checklist[item.id] && (
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                      <path d="M1.5 5.5l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+                <span className="checklist-label">{item.label}</span>
+                {checklist[item.id] && (
+                  <span className="checklist-done-tag">Done</span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
