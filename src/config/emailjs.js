@@ -26,3 +26,14 @@
 export const EMAILJS_SERVICE_ID  = 'service_218zwgb';
 export const EMAILJS_TEMPLATE_ID = 'template_x8ag47g';
 export const EMAILJS_PUBLIC_KEY  = 'WAsEkOEqpExSyr5w9';
+
+/**
+ * ImgBB — free image hosting used to embed the report as a real HTTPS image
+ * in the email (data: URIs are blocked by Gmail, Outlook, etc.)
+ *
+ * Setup (free, takes 1 minute):
+ * 1. Sign up at https://imgbb.com
+ * 2. Go to https://api.imgbb.com  →  click "Get API key"
+ * 3. Copy your key and paste it below
+ */
+export const IMGBB_API_KEY = 'YOUR_IMGBB_API_KEY';

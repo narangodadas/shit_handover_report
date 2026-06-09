@@ -49,6 +49,14 @@ export default function ReportPreview() {
       scrollY: -window.scrollY,
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight,
+      onclone: (clonedDoc) => {
+        // CSS animations restart in the clone and would capture elements at
+        // opacity:0 (the fadeUp "from" keyframe). Snap all durations to 0 so
+        // animation-fill-mode:both immediately applies the final "to" state.
+        const s = clonedDoc.createElement('style');
+        s.textContent = '*, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; }';
+        clonedDoc.head.appendChild(s);
+      },
     });
     const link = document.createElement("a");
     link.download = `noc-handover-${report.date.replace(/\s/g, "-")}.png`;
