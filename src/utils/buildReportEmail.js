@@ -54,11 +54,7 @@ const STATUS = {
 function emailDesc(d) {
   const parts = String(d ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   if (!parts.length) return '';
-  if (parts.length === 1)
-    return `<p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${esc(parts[0])}</p>`;
-  return parts.map((p, i) =>
-    `<p style="margin:0${i < parts.length - 1 ? ' 0 4px' : ''};font-size:13px;color:#475569;line-height:1.6;">&#8226;&nbsp;${esc(p)}</p>`
-  ).join('');
+  return `<p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${parts.map(esc).join(' &bull; ')}</p>`;
 }
 
 // Filled task row — matches report-task-row style
