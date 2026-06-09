@@ -19,6 +19,7 @@ export default function HandoverForm() {
     DAILY_CHECKLIST.reduce((acc, item) => ({ ...acc, [item.id]: false }), {})
   );
   const toggleChecklist = (id) => setChecklist(prev => ({ ...prev, [id]: !prev[id] }));
+  const isDayShift = timing.startsWith("Day Shift");
   const [members, setMembers] = useState(TEAM_MEMBERS);
   const [errors, setErrors] = useState({});
   const [addingMember, setAddingMember] = useState({ from: false, to: false });
@@ -76,7 +77,9 @@ export default function HandoverForm() {
       handoverFrom,
       handoverTo,
       tasks: resolvedTasks,
-      checklist: DAILY_CHECKLIST.map(item => ({ label: item.label, done: checklist[item.id] }))
+      checklist: isDayShift
+        ? DAILY_CHECKLIST.map(item => ({ label: item.label, done: checklist[item.id] }))
+        : null
     };
     navigate("/report", { state: { reportData } });
   };
@@ -175,6 +178,7 @@ export default function HandoverForm() {
           </div>
         </div>
 
+        {isDayShift && (
         <div className="form-card">
           <div className="form-card-header">
             <div className="form-card-icon">
@@ -212,6 +216,7 @@ export default function HandoverForm() {
             ))}
           </div>
         </div>
+        )}
 
         <div className="form-card">
           <div className="form-card-header">

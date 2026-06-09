@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY } from '../config/emailjs';
-import { buildReportEmailHtml } from '../utils/buildReportEmail';
+import { buildImageEmailHtml } from '../utils/buildReportEmail';
 
 export default function SendReportEmail({ report }) {
   const [email, setEmail]   = useState('');
@@ -29,7 +29,26 @@ export default function SendReportEmail({ report }) {
     setErrMsg('');
 
     try {
-      const reportHtml = buildReportEmailHtml(report);
+      const reportEl = document.getElementById("report");
+      if (!reportEl) throw new Error("Report not visible — scroll down to see the report first.");
+
+      const { default: html2canvas } = await import("html2canvas");
+      if (document.fonts?.ready) await document.fonts.ready;
+
+      const canvas = await html2canvas(reportEl, {
+        scale: 1.8,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        imageTimeout: 0,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: reportEl.scrollWidth,
+      });
+
+      const base64Image = canvas.toDataURL("image/jpeg", 0.85);
+      const reportHtml  = buildImageEmailHtml(base64Image, report);
 
       await emailjs.send(
         EMAILJS_SERVICE_ID,

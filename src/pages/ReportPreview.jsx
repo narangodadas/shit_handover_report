@@ -37,8 +37,9 @@ export default function ReportPreview() {
     const { default: html2canvas } = await import("html2canvas");
     const element = document.getElementById("report");
     if (!element) return;
+    if (document.fonts?.ready) await document.fonts.ready;
     const canvas = await html2canvas(element, {
-      scale: 3,
+      scale: 4,
       useCORS: true,
       allowTaint: true,
       logging: false,
@@ -46,6 +47,8 @@ export default function ReportPreview() {
       imageTimeout: 0,
       scrollX: 0,
       scrollY: -window.scrollY,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight,
     });
     const link = document.createElement("a");
     link.download = `noc-handover-${report.date.replace(/\s/g, "-")}.png`;

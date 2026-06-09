@@ -51,6 +51,16 @@ const STATUS = {
   },
 };
 
+function emailDesc(d) {
+  const parts = String(d ?? '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return '';
+  if (parts.length === 1)
+    return `<p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${esc(parts[0])}</p>`;
+  return parts.map((p, i) =>
+    `<p style="margin:0${i < parts.length - 1 ? ' 0 4px' : ''};font-size:13px;color:#475569;line-height:1.6;">&#8226;&nbsp;${esc(p)}</p>`
+  ).join('');
+}
+
 // Filled task row — matches report-task-row style
 function taskRow(task) {
   const s = STATUS[task.status] || STATUS.Pending;
@@ -60,7 +70,7 @@ function taskRow(task) {
     <tr>
       <td style="padding:16px 20px;vertical-align:top;">
         <p style="margin:0 0 5px;font-size:14px;font-weight:700;color:#0f172a;">${esc(task.name)}</p>
-        <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${esc(task.description)}</p>
+        ${emailDesc(task.description)}
       </td>
       <td style="padding:16px 20px;vertical-align:middle;text-align:right;white-space:nowrap;">
         <span style="display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;background:${s.badgeBg};border:1px solid ${s.badgeBorder};color:${s.badgeColor};">${esc(task.status)}</span>
@@ -153,6 +163,36 @@ function checklistSection(checklist) {
       <table width="100%" cellpadding="0" cellspacing="0">${rows.join('')}</table>
     </td>
   </tr>`;
+}
+
+export function buildImageEmailHtml(base64Image, report) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eef2f7;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:28px 16px;">
+<tr><td align="center">
+  <table width="700" cellpadding="0" cellspacing="0" style="max-width:700px;">
+    <tr>
+      <td style="padding-bottom:14px;text-align:center;">
+        <p style="margin:0;font-size:12px;color:#64748b;">NOC Shift Handover &middot; ${esc(report.date)} &middot; ${esc(report.timing)}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.12);">
+        <img src="${base64Image}" width="700" style="display:block;width:100%;max-width:700px;" alt="NOC Shift Handover Report">
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-top:14px;text-align:center;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">FIT Network Operations Center &mdash; Automated Shift Handover Report</p>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+</table>
+</body>
+</html>`;
 }
 
 export function buildReportEmailHtml(report) {
