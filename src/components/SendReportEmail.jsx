@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY } from '../config/emailjs';
 import { buildReportEmailHtml } from '../utils/buildReportEmail';
@@ -44,10 +44,33 @@ export default function SendReportEmail({ report }) {
       setTimeout(() => setStatus('idle'), 6000);
     } catch (err) {
       console.error('EmailJS send error:', err);
+      // Try to surface a useful message from EmailJS response
+      let msg = 'Send failed. Check your EmailJS configuration and try again.';
+      try {
+        if (err && typeof err === 'object') {
+          if (err.text) msg = String(err.text);
+          else if (err.status && err.message) msg = `${err.status}: ${err.message}`;
+          else if (err.message) msg = String(err.message);
+          else msg = JSON.stringify(err);
+        }
+      } catch (e) {
+        /* ignore formatting errors */
+      }
       setStatus('error');
-      setErrMsg('Send failed. Check your EmailJS configuration and try again.');
+      setErrMsg(msg);
     }
   };
+
+  useEffect(() => {
+    // Ensure EmailJS is initialized with the public key (harmless if already initialized)
+    try {
+      if (EMAILJS_PUBLIC_KEY && typeof emailjs.init === 'function') {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+      }
+    } catch (e) {
+      console.warn('EmailJS init warning:', e);
+    }
+  }, []);
 
   const isBusy = status === 'sending';
   const isSent  = status === 'sent';
