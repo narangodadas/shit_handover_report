@@ -5,13 +5,6 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
-function formatDescription(d) {
-  return String(d ?? '')
-    .split(/\r?\n/)
-    .map(s => s.trim())
-    .filter(Boolean)
-    .join(' • ');
-}
 
 const STATUS = {
   Complete: {
@@ -106,6 +99,62 @@ function sectionHeading(title) {
 </table>`;
 }
 
+function checklistSection(checklist) {
+  if (!checklist || checklist.length === 0) return '';
+  const doneCount = checklist.filter(i => i.done).length;
+  const items = checklist.map((item) => {
+    const icon = item.done
+      ? `<div style="width:22px;height:22px;border-radius:50%;background:#dcfce7;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">
+           <span style="color:#16a34a;font-size:13px;line-height:1;">&#10003;</span>
+         </div>`
+      : `<div style="width:22px;height:22px;border-radius:50%;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;">
+           <span style="color:#94a3b8;font-size:11px;line-height:1;">&#10005;</span>
+         </div>`;
+    const labelColor = item.done ? '#0f172a' : '#94a3b8';
+    const statusText = item.done ? 'Completed' : 'Not completed';
+    const statusColor = item.done ? '#16a34a' : '#94a3b8';
+    const bg = item.done ? '#f0fdf4' : '#f7f9fc';
+    const borderLeft = item.done ? '3px solid #16a34a' : '3px solid #e2e8f0';
+    return `<td width="48%" style="padding:0;vertical-align:top;">
+      <div style="background:${bg};border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;border-left:${borderLeft};border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <table cellpadding="0" cellspacing="0"><tr>
+          <td style="vertical-align:middle;padding-right:12px;">${icon}</td>
+          <td style="vertical-align:middle;">
+            <p style="margin:0 0 2px;font-size:13px;font-weight:600;color:${labelColor};line-height:1.3;">${esc(item.label)}</p>
+            <p style="margin:0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${statusColor};">${statusText}</p>
+          </td>
+        </tr></table>
+      </div>
+    </td>`;
+  });
+
+  const rows = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const right = items[i + 1]
+      ? `<td width="4%"></td>${items[i + 1]}`
+      : `<td width="4%"></td><td width="48%"></td>`;
+    rows.push(`<tr>${items[i]}${right}</tr><tr><td colspan="3" style="height:10px;font-size:0;">&nbsp;</td></tr>`);
+  }
+
+  return `
+  <!-- Daily Checklist -->
+  <tr><td style="height:1px;background:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr>
+  <tr>
+    <td style="background:#ffffff;padding:32px 40px;">
+      <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
+        <tr>
+          <td style="width:3px;background:#2563eb;border-radius:2px;font-size:0;">&nbsp;</td>
+          <td style="padding-left:12px;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;vertical-align:middle;line-height:20px;">Daily Checklist</td>
+          <td style="text-align:right;vertical-align:middle;">
+            <span style="padding:4px 12px;background:#dbeafe;border:1px solid rgba(37,99,235,0.15);border-radius:20px;font-size:11px;font-weight:700;color:#1d4ed8;">${doneCount} / ${checklist.length} Completed</span>
+          </td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0">${rows.join('')}</table>
+    </td>
+  </tr>`;
+}
+
 export function buildReportEmailHtml(report) {
   const displayTasks  = report.tasks.filter(t => t.name && t.name !== 'None');
   const completeTasks = displayTasks.filter(t => t.status === 'Complete');
@@ -138,7 +187,6 @@ export function buildReportEmailHtml(report) {
       <p style="margin:0;font-size:17px;font-weight:700;color:#ffffff;letter-spacing:0.12em;text-transform:uppercase;line-height:1;">
         <span style="color:rgba(255,255,255,0.4);font-size:10px;margin-right:16px;">&#9679;</span>FIT NETWORK OPERATIONS CENTER<span style="color:rgba(255,255,255,0.4);font-size:10px;margin-left:16px;">&#9679;</span>
       </p>
-        <p style="margin:0;font-size:13px;color:#475569;line-height:1.6;">${esc(formatDescription(task.description))}</p>
     </td>
   </tr>
 
@@ -185,8 +233,7 @@ export function buildReportEmailHtml(report) {
     </td>
   </tr>
 
-  <!-- ⑥ Divider -->
-  <tr><td style="height:1px;background:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr>
+  ${checklistSection(report.checklist)}
 
   <!-- ⑦ Task Status & Updates -->
   <tr>
