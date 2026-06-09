@@ -36,7 +36,7 @@ export default function SendReportEmail({ report }) {
       if (document.fonts?.ready) await document.fonts.ready;
 
       const canvas = await html2canvas(reportEl, {
-        scale: 1.8,
+        scale: 1.0,
         useCORS: true,
         allowTaint: true,
         logging: false,
@@ -47,7 +47,19 @@ export default function SendReportEmail({ report }) {
         windowWidth: reportEl.scrollWidth,
       });
 
-      const base64Image = canvas.toDataURL("image/jpeg", 0.85);
+      // Downscale canvas to max 720px wide before encoding —
+      // keeps base64 payload well under EmailJS's ~200KB API limit
+      const EMAIL_MAX_W = 720;
+      let emailCanvas = canvas;
+      if (canvas.width > EMAIL_MAX_W) {
+        const ratio = EMAIL_MAX_W / canvas.width;
+        emailCanvas = document.createElement("canvas");
+        emailCanvas.width  = EMAIL_MAX_W;
+        emailCanvas.height = Math.round(canvas.height * ratio);
+        emailCanvas.getContext("2d").drawImage(canvas, 0, 0, emailCanvas.width, emailCanvas.height);
+      }
+
+      const base64Image = emailCanvas.toDataURL("image/jpeg", 0.72);
       const reportHtml  = buildImageEmailHtml(base64Image, report);
 
       await emailjs.send(
@@ -67,10 +79,16 @@ export default function SendReportEmail({ report }) {
       let msg = 'Send failed. Check your EmailJS configuration and try again.';
       try {
         if (err && typeof err === 'object') {
-          if (err.text) msg = String(err.text);
-          else if (err.status && err.message) msg = `${err.status}: ${err.message}`;
-          else if (err.message) msg = String(err.message);
-          else msg = JSON.stringify(err);
+          const status = err.status ?? err.code;
+          if (status === 413 || String(err.text ?? '').includes('413')) {
+            msg = 'Email payload too large (413). Reduce the number of tasks and try again.';
+          } else if (err.text) {
+            msg = String(err.text);
+          } else if (err.message) {
+            msg = String(err.message);
+          } else {
+            msg = JSON.stringify(err);
+          }
         }
       } catch (e) {
         /* ignore formatting errors */
